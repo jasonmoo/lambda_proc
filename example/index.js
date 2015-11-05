@@ -6,10 +6,6 @@ var child_process = require('child_process'),
 	done = console.log.bind(console),
 	fails = 0;
 
-function isJSON(str) {
-	return (/^({.*})$/).test(str);
-}
-
 (function new_go_proc() {
 
 	// pipe stdin/out, blind passthru stderr
@@ -55,21 +51,9 @@ function isJSON(str) {
 		}
 		// check for newline ascii char 10
 		if (data.length && data[data.length-1] == 10) {
-			// Get the data as a strings, then reset.
-			var strs = data.toString('UTF-8').split(String.fromCharCode(10));
+			var output = JSON.parse(data.toString('UTF-8'));
 			data = null;
-
-			for (var i = 0; i < strs.length; i++) {
-				var str = strs[i];
-				// If this isn't json, log it out.
-				if (!isJSON(str)) {
-					console.log(str);
-					continue;
-				}
-				// This is a json response, we are done.
-				var output = JSON.parse(str);
-				return done(null, output);
-			}
+			done(null, output);
 		};
 	});
 })();
