@@ -61,6 +61,11 @@ func NewResponse(data interface{}) *Response {
 	}
 }
 
+// Log send log output to the node process.
+func Log(msg string) {
+	os.Stdout.WriteString(msg + "\n");
+}
+
 func Run(handler Handler) {
 	RunStream(handler, os.Stdin, os.Stdout)
 }

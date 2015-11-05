@@ -6,6 +6,17 @@ var child_process = require('child_process'),
 	done = console.log.bind(console),
 	fails = 0;
 
+// Taken from Prototype. https://github.com/sstephenson/prototype
+function isJSON(str) {
+	if (str == "") return false;
+
+	str = str.replace(/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g, '@');
+	str = str.replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, ']');
+	str = str.replace(/(?:^|:|,)(?:\s*\[)+/g, '');
+
+	return (/^[\],:{}\s]*$/).test(str);
+}
+
 (function new_go_proc() {
 
 	// pipe stdin/out, blind passthru stderr
@@ -48,8 +59,16 @@ var child_process = require('child_process'),
 		}
 		// check for newline ascii char 10
 		if (data.length && data[data.length-1] == 10) {
-			var output = JSON.parse(data.toString('UTF-8'));
+			// Get the data as a string, then reset.
+			var str = data.toString('UTF-8');
 			data = null;
+			// If this isn't json, it is just a log.
+			if (!isJSON(str)) {
+				console.log(str.substring(0, str.length-2));
+				return;
+			}
+			// This is json response, we are done.
+			var output = JSON.parse(str);
 			done(null, output);
 		};
 	});
