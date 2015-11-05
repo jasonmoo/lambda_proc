@@ -6,21 +6,17 @@ var child_process = require('child_process'),
 	done = console.log.bind(console),
 	fails = 0;
 
-// Taken from Prototype. https://github.com/sstephenson/prototype
 function isJSON(str) {
-	if (str == "") return false;
-
-	str = str.replace(/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g, '@');
-	str = str.replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, ']');
-	str = str.replace(/(?:^|:|,)(?:\s*\[)+/g, '');
-
-	return (/^[\],:{}\s]*$/).test(str);
+	return (/^({.*})$/).test(str);
 }
 
 (function new_go_proc() {
 
 	// pipe stdin/out, blind passthru stderr
-	go_proc = child_process.spawn('./main', { stdio: ['pipe', 'pipe', process.stderr] });
+	go_proc = child_process.spawn('./main', {
+		env: process.env,
+		stdio: ['pipe', 'pipe', process.stderr]
+	});
 
 	go_proc.on('error', function(err) {
 		process.stderr.write("go_proc errored: "+JSON.stringify(err)+"\n");
@@ -59,17 +55,21 @@ function isJSON(str) {
 		}
 		// check for newline ascii char 10
 		if (data.length && data[data.length-1] == 10) {
-			// Get the data as a string, then reset.
-			var str = data.toString('UTF-8');
+			// Get the data as a strings, then reset.
+			var strs = data.toString('UTF-8').split(String.fromCharCode(10));
 			data = null;
-			// If this isn't json, it is just a log.
-			if (!isJSON(str)) {
-				console.log(str.substring(0, str.length-2));
-				return;
+
+			for (var i = 0; i < strs.length; i++) {
+				var str = strs[i];
+				// If this isn't json, log it out.
+				if (!isJSON(str)) {
+					console.log(str);
+					continue;
+				}
+				// This is a json response, we are done.
+				var output = JSON.parse(str);
+				return done(null, output);
 			}
-			// This is json response, we are done.
-			var output = JSON.parse(str);
-			done(null, output);
 		};
 	});
 })();
