@@ -42,9 +42,9 @@ var child_process = require('child_process'),
 	go_proc.stdout.on('data', function(chunk) {
 		fails = 0; // reset fails
 		if (data === null) {
-			data = new Buffer(chunk);
+			data = chunk;
 		} else {
-			data.write(chunk);
+			data = Buffer.concat([data, chunk]);
 		}
 		// check for newline ascii char 10
 		if (data.length && data[data.length-1] == 10) {
