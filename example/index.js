@@ -48,9 +48,14 @@ var child_process = require('child_process'),
 		}
 		// check for newline ascii char 10
 		if (data.length && data[data.length-1] == 10) {
-			var output = JSON.parse(data.toString('UTF-8'));
-			data = null;
-			done(null, output);
+			try{
+				var output = JSON.parse(data.toString('UTF-8'));
+				data = null;
+				done(null, output);
+			}catch(err){
+				console.log("error when trying to decode:"+data.toString('UTF-8'));
+				done(err);
+			}
 		};
 	});
 })();
