@@ -52,9 +52,12 @@ var child_process = require('child_process'),
 				var output = JSON.parse(data.toString('UTF-8'));
 				data = null;
 				done(null, output);
-			}catch(err){
-				console.log("error when trying to decode:"+data.toString('UTF-8'));
-				done(err);
+			} catch(err) {
+				    done({
+				        "error": err.toString('UTF-8'),
+				        "payload": data.toString('UTF-8')
+				    });
+				}
 			}
 		};
 	});
