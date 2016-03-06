@@ -53,11 +53,10 @@ var child_process = require('child_process'),
 				data = null;
 				done(null, output);
 			} catch(err) {
-				    done({
-				        "error": err.toString('UTF-8'),
-				        "payload": data.toString('UTF-8')
-				    });
-				}
+				done({
+					"error": err.toString('UTF-8'),
+					"payload": data.toString('UTF-8')
+				});
 			}
 		};
 	});
