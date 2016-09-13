@@ -3,7 +3,19 @@
 set -e
 set -x
 
-GOOS=linux go build -o main
+#GOOS=linux go build -o main
+# Using Docker linux image to compile golang natively
+# you can't use CGO to link to system libraries.
+# cross compiling makes you lose native DNS resolution and some other
+# linux system libraries with CGO
+# dependency obviously to install Docker 
+
+# building vendor dependencies
+docker run --rm -it -v "$PWD":/app -w /app qapi/gocker vendor
+
+# compiling natively
+docker run --rm -v "$PWD":/app -w /app qapi/gocker cross
+
 
 zip -r lambda.zip main index.js
 
